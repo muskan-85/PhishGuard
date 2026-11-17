@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard | AI Phishing Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="page-shell">
+
+        <nav class="navbar">
+            <a class="brand" href="/">
+                <span class="brand-icon">◈</span>
+                <span>Phish<span>Guard</span></span>
+            </a>
+
+            <div class="nav-links">
+                <a class="active" href="/">Scanner</a>
+                <a href="/history">Scan History</a>
+            </div>
+        </nav>
+
+        <main>
+            <section class="hero">
+                <div class="hero-badge">AI-POWERED URL SECURITY</div>
+                <h1>Detect phishing before<br><span>it reaches you.</span></h1>
+                <p>
+                    Analyze a URL using machine-learning based lexical pattern detection
+                    and explainable security indicators.
+                </p>
+            </section>
+
+            <section class="scanner-card">
+                <div class="card-heading">
+                    <div>
+                        <p class="eyebrow">URL SCANNER</p>
+                        <h2>Analyze a suspicious link</h2>
+                    </div>
+                    <div class="shield">✓</div>
+                </div>
+
+                <form method="POST" class="scan-form">
+                    <div class="input-wrap">
+                        <span class="input-icon">↗</span>
+                        <input
+                            type="text"
+                            name="url"
+                            value="{{ scanned_url }}"
+                            placeholder="https://example.com"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+                    <button type="submit">Analyze URL <span>→</span></button>
+                </form>
+
+                <p class="privacy-note">
+                    <span>●</span> Analysis is performed locally by the PhishGuard model.
+                </p>
+            </section>
+
+            {% if result %}
+            <section class="result-card {% if result.result == 'Phishing' %}danger{% else %}safe{% endif %}">
+
+                <div class="result-top">
+                    <div>
+                        <p class="eyebrow">ANALYSIS COMPLETE</p>
+                        <h2>{{ result.result }}</h2>
+                        <p class="result-subtitle">
+                            {% if result.result == 'Phishing' %}
+                                This URL shows patterns associated with phishing.
+                            {% else %}
+                                This URL shows no major phishing indicators.
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="score-ring">
+                        <div class="score-number">{{ result.risk_score }}<small>%</small></div>
+                        <div class="score-label">RISK</div>
+                    </div>
+                </div>
+
+                <div class="risk-bar">
+                    <div style="width: {{ result.risk_score }}%;"></div>
+                </div>
+
+                <div class="result-grid">
+                    <div class="info-card">
+                        <span class="info-label">CLASSIFICATION</span>
+                        <strong>{{ result.result }}</strong>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-label">RISK LEVEL</span>
+                        <strong>{{ result.risk_level }}</strong>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-label">MODEL</span>
+                        <strong>ML URL Classifier</strong>
+                    </div>
+                </div>
+
+                <div class="reasons">
+                    <div class="section-title">
+                        <span>◈</span>
+                        <h3>Explainable indicators</h3>
+                    </div>
+
+                    <ul>
+                        {% for reason in result.reasons %}
+                        <li>
+                            <span class="reason-dot">!</span>
+                            <span>{{ reason }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="scanned-url">
+                    <span>SCANNED URL</span>
+                    <code>{{ scanned_url }}</code>
+                </div>
+
+            </section>
+            {% endif %}
+        </main>
+
+        <footer>
+            <span>PhishGuard</span> · AI-Powered Phishing Detection & Risk Analysis
+        </footer>
+    </div>
+</body>
+</html>

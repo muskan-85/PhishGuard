@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<section class="welcome-line">
+  <div><div class="eyebrow"><span class="eyebrow-mark"></span> PRIVATE URL ANALYSIS / {{ app_version }}</div>
+  <h1>Pause before<br><em>you trust the link.</em></h1>
+  <p class="intro-copy">A link can look familiar and still lead somewhere unsafe. Inspect its structure, understand the signals, and make a more informed decision.</p>
+  <div class="welcome-meta"><span class="meta-icon">⌁</span> Text-based inspection <span class="meta-divider"></span> No external requests</div>
+  </div>
+  <div class="orbital-art" aria-label="Abstract URL security illustration">
+    <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="orbit orbit-c"></div>
+    <div class="orb-core"><svg viewBox="0 0 90 90"><path d="M45 9 72 19v21c0 17-11.3 30-27 36C29.3 70 18 57 18 40V19L45 9Z"/><path d="m32 44 9 9 18-19"/></svg></div>
+    <span class="orbit-tag tag-a">URL / CHECK</span><span class="orbit-tag tag-b">SIGNALS</span><span class="orbit-tag tag-c">LOCAL</span>
+  </div>
+</section>
+
+<section class="launch-panel">
+  <div class="launch-heading">
+    <div><span class="section-index">01 / INSPECTION</span><h2>Examine a URL</h2></div>
+    <span class="panel-code">PG-URL // INPUT</span>
+  </div>
+  <p class="panel-description">Paste the complete web address below. PhishGuard evaluates URL patterns with its trained classifier and supporting indicators.</p>
+  <form class="url-entry" method="post" action="{{ url_for('scanner') }}">
+    <span class="url-prefix"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></svg></span>
+    <input type="text" name="url" maxlength="2048" placeholder="https://website-address.com/path" autocomplete="off" spellcheck="false" required aria-label="URL to analyze">
+    <button type="submit">Inspect URL <span>↗</span></button>
+  </form>
+  <div class="launch-foot"><span><i class="tiny-lock"></i> Your URL stays within this local application</span><a href="{{ url_for('scanner') }}">Open detailed scanner <b>→</b></a></div>
+</section>
+
+<section class="method-strip">
+  <div class="method-title"><span class="section-index">02 / HOW IT WORKS</span><h2>Three layers.<br><em>One clearer picture.</em></h2></div>
+  <article class="method-item"><span class="method-no">A</span><div><h3>URL structure</h3><p>Checks visible address patterns such as length, host structure and unusual characters.</p></div></article>
+  <article class="method-item"><span class="method-no">B</span><div><h3>ML classification</h3><p>Compares URL text patterns with patterns learned during model training.</p></div></article>
+  <article class="method-item"><span class="method-no">C</span><div><h3>Explainable result</h3><p>Shows a verdict, risk estimate and indicators that help explain the assessment.</p></div></article>
+</section>
+
+<section class="bottom-note">
+  <div class="note-glyph">i</div><div><strong>Important context</strong><p>A legitimate verdict is not a guarantee that a website is safe. PhishGuard only analyzes the submitted URL text; it does not inspect page content, redirects or live website behaviour.</p></div>
+  <a href="{{ url_for('history') }}">View scan archive <span>↗</span></a>
+</section>
+{% if model_status.state != 'online' %}
+<div class="system-message"><strong>Detection engine notice</strong>{{ model_status.message }}</div>
+{% endif %}
+{% endblock %}

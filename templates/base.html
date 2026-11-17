@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11152b">
+  <title>{% block title %}PhishGuard{% endblock %} · PhishGuard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+</head>
+<body>
+<div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+<div class="app-frame">
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('dashboard') }}" aria-label="PhishGuard home">
+      <span class="brand-symbol"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M18 3.5 30 8v9.2c0 7.3-5 12.9-12 15.3C11 30.1 6 24.5 6 17.2V8l12-4.5Z"/><path d="m12.5 18 3.7 3.7 7.8-8"/></svg></span>
+      <span class="brand-word">phish<span>guard</span><small>URL INTELLIGENCE</small></span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if active == 'dashboard' else '' }}">Overview</a>
+      <a href="{{ url_for('scanner') }}" class="{{ 'active' if active == 'scanner' else '' }}">Scanner</a>
+      <a href="{{ url_for('history') }}" class="{{ 'active' if active == 'history' else '' }}">Scan archive</a>
+    </nav>
+    <div class="top-actions">
+      <span class="engine-state {{ model_status.state }}"><i></i>{% if model_status.state == 'online' %}Engine ready{% elif model_status.state == 'warning' %}Engine warning{% else %}Engine offline{% endif %}</span>
+      <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Switch colour theme" title="Switch colour theme">
+        <svg class="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+        <svg class="moon-icon" viewBox="0 0 24 24"><path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.7 8.7 0 1 0 20.5 15.5Z"/></svg>
+        <span class="theme-label">Light mode</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="page-content">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <span>PHISHGUARD <b>·</b> URL INTELLIGENCE</span>
+    <span>Links are inspected as text only. No website is opened or downloaded.</span>
+  </footer>
+</div>
+{% block scripts %}{% endblock %}
+</body>
+</html>

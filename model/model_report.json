@@ -1,0 +1,67 @@
+{
+  "model_name": "Character TF-IDF + Logistic Regression",
+  "trained_at_utc": "2026-10-17 05:19:05",
+  "sklearn_version": "1.9.1",
+  "dataset_file": "phishguard_balanced_10000.csv",
+  "dataset_rows": 10000,
+  "dataset_legitimate": 5000,
+  "dataset_phishing": 5000,
+  "train_rows_original": 8000,
+  "train_rows_after_augmentation": 14017,
+  "www_augmentation": true,
+  "test_rows": 2000,
+  "test_size": 0.2,
+  "seed": 42,
+  "tfidf_features": 60000,
+  "metrics": {
+    "accuracy": 0.935,
+    "precision": 0.9588607594936709,
+    "recall": 0.909,
+    "f1": 0.9332648870636551,
+    "roc_auc": 0.979842
+  },
+  "confusion_matrix": {
+    "true_negative": 961,
+    "false_positive": 39,
+    "false_negative": 91,
+    "true_positive": 909
+  },
+  "leakage_checks": {
+    "exact_urls_in_train_and_test": 0,
+    "test_hostnames_also_in_train_pct": 18.1,
+    "duplicate_urls_in_dataset": 0
+  },
+  "band_calibration": [
+    {
+      "band": "Low Risk",
+      "range": "0-25",
+      "test_urls": 912,
+      "actual_phishing_pct": 3.2
+    },
+    {
+      "band": "Medium Risk",
+      "range": "25-50",
+      "test_urls": 140,
+      "actual_phishing_pct": 44.3
+    },
+    {
+      "band": "High Risk",
+      "range": "50-75",
+      "test_urls": 175,
+      "actual_phishing_pct": 88.0
+    },
+    {
+      "band": "Critical Risk",
+      "range": "75-100",
+      "test_urls": 773,
+      "actual_phishing_pct": 97.7
+    }
+  ],
+  "dataset_bias_check": {
+    "share_with_www_legitimate_pct": 95.8,
+    "share_with_www_phishing_pct": 12.2,
+    "test_accuracy_after_removing_www": 0.931,
+    "legitimate_recall_after_removing_www": 0.951
+  },
+  "decision_threshold": 0.5
+}

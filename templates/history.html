@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Scan Archive{% endblock %}
+{% block content %}
+<div class="page-kicker"><a href="{{ url_for('dashboard') }}">Overview</a><span>/</span><b>Scan archive</b></div>
+<section class="archive-heading">
+  <div><div class="eyebrow"><span class="eyebrow-mark"></span> PRIVATE RECORD / LOCAL DATABASE</div><h1>Past inspections.<br><em>Nothing forgotten.</em></h1>
+  <p>Review previous URL assessments saved by this application. Select a record to reopen its available analysis report.</p></div>
+  <a href="{{ url_for('scanner') }}" class="outline-action">New inspection <b>↗</b></a>
+</section>
+
+<section class="archive-tools">
+  <div><span class="section-index">01 / STORED RECORDS</span><strong>{{ total }} <small>{{ 'inspection' if total == 1 else 'inspections' }}</small></strong></div>
+  <div class="filter-set" aria-label="Filter records">
+    <a class="{{ 'selected' if filter == 'all' else '' }}" href="{{ url_for('history') }}">All records</a>
+    <a class="{{ 'selected' if filter == 'Legitimate' else '' }}" href="{{ url_for('history', filter='Legitimate') }}">Legitimate</a>
+    <a class="{{ 'selected' if filter == 'Phishing' else '' }}" href="{{ url_for('history', filter='Phishing') }}">Phishing</a>
+  </div>
+</section>
+
+{% if scans %}
+<div class="archive-list">
+  {% for s in scans %}
+  <article class="archive-record">
+    <div class="record-mark {{ 'danger' if s.result == 'Phishing' else 'safe' }}"><span>{{ '!' if s.result == 'Phishing' else '✓' }}</span></div>
+    <div class="record-main"><span class="record-time">{{ s.scanned_at|pretty_time }}</span><strong title="{{ s.url }}">{{ s.url }}</strong><span class="record-sub">{{ s.risk_level }} <i>·</i> Risk estimate {{ s.risk_score }}%</span></div>
+    <div class="record-verdict"><span class="verdict-pill {{ 'danger' if s.result == 'Phishing' else 'safe' }}">{{ s.result }}</span><a href="{{ url_for('scanner', scan=s.id) }}">View report <b>↗</b></a></div>
+    <div class="record-score"><span>RISK</span><strong>{{ s.risk_score }}<small>%</small></strong><div><i class="{{ 'danger' if s.result == 'Phishing' else 'safe' }}" style="width:{{ s.risk_score }}%"></i></div></div>
+  </article>
+  {% endfor %}
+</div>
+<div class="archive-pagination"><span>Page {{ page }} of {{ pages }}</span><div>
+  <a class="{{ 'disabled' if page <= 1 }}" href="{{ url_for('history', page=page - 1, filter=filter if filter != 'all') }}">← Previous</a>
+  <a class="{{ 'disabled' if page >= pages }}" href="{{ url_for('history', page=page + 1, filter=filter if filter != 'all') }}">Next →</a>
+</div></div>
+{% else %}
+<div class="archive-empty"><div class="empty-orbit">⌁</div><span class="section-index">NO MATCHING RECORDS</span><h2>{% if filter == 'all' %}Your archive is quiet.{% else %}No {{ filter|lower }} records.{% endif %}</h2><p>{% if filter == 'all' %}When you inspect a URL, its result will be stored here for later review.{% else %}There are no saved records for this classification yet.{% endif %}</p><a href="{{ url_for('scanner') }}">Start an inspection <b>↗</b></a></div>
+{% endif %}
+{% endblock %}

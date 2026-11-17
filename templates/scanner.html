@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}URL Scanner{% endblock %}
+{% block content %}
+<div class="page-kicker"><a href="{{ url_for('dashboard') }}">Overview</a><span>/</span><b>Scanner</b></div>
+<section class="scanner-intro">
+  <div><div class="eyebrow"><span class="eyebrow-mark"></span> URL FORENSICS / INPUT</div><h1>Inspect the<br><em>address itself.</em></h1>
+  <p>Submit a URL as text. The detection engine evaluates its patterns without visiting the destination website.</p></div>
+  <div class="scanner-stamp"><span>SCAN MODE</span><strong>TEXT ONLY</strong><small>NO SITE REQUESTS</small></div>
+</section>
+
+<section class="scanner-workspace">
+  <div class="workspace-top"><span class="section-index">01 — URL SUBMISSION</span><span class="workspace-state"><i></i> READY FOR INPUT</span></div>
+  <form method="post" action="{{ url_for('scanner') }}" class="url-entry scanner-entry" id="scan-form" novalidate>
+    <span class="url-prefix"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></svg></span>
+    <input type="text" name="url" id="url-input" value="{{ submitted }}" maxlength="2048" autocomplete="off" spellcheck="false" placeholder="https://example.com/login" aria-label="URL to analyze" {% if error %}aria-invalid="true"{% endif %} required autofocus>
+    <button type="submit" id="scan-btn"><span class="spinner"></span><span id="scan-label">Analyze URL <b>↗</b></span></button>
+  </form>
+  <div class="example-row"><span>QUICK INPUTS</span><button type="button" class="example" data-url="https://www.wikipedia.org">wikipedia.org</button><button type="button" class="example" data-url="https://www.microsoft.com/en-us">microsoft.com</button><button type="button" class="example" data-url="http://secure-login.example.com/verify-account/update.php">sample suspicious pattern</button></div>
+  <div class="privacy-line"><span class="tiny-lock"></span> The URL is never opened, fetched or downloaded by PhishGuard.</div>
+</section>
+
+{% if error %}
+<div class="system-message error-message" role="alert"><strong>Analysis could not be completed</strong>{{ error }}</div>
+{% endif %}
+
+{% if result %}
+{% set phishing = result.result == 'Phishing' %}
+{% set det = result.details %}
+<section class="report-shell" id="result" aria-live="polite">
+  <div class="report-header">
+    <div><span class="section-index">02 — ANALYSIS REPORT</span><div class="report-id">LOCAL CLASSIFIER / RESULT {{ result.id }}</div></div>
+    <span class="report-status {{ 'danger' if phishing else 'safe' }}"><i></i> ANALYSIS COMPLETE</span>
+  </div>
+  <div class="verdict-layout">
+    <div class="verdict-copy">
+      <div class="verdict-label {{ 'danger' if phishing else 'safe' }}"><span></span>{{ 'SUSPICIOUS PATTERN DETECTED' if phishing else 'NO HIGH-RISK CLASSIFICATION' }}</div>
+      <h2 class="{{ 'danger-text' if phishing else 'safe-text' }}">{{ result.result }}</h2>
+      <p>{% if phishing %}The classifier identifies patterns commonly associated with phishing. Avoid entering passwords or personal information on an unverified destination.{% elif result.risk_level == 'Medium Risk' %}The classifier leans legitimate, but the result has some uncertainty. Check the destination independently before trusting it.{% else %}The classifier found no major phishing pattern in the submitted URL. This does not guarantee that the destination is safe.{% endif %}</p>
+    </div>
+    <div class="risk-meter {{ 'danger' if phishing else 'safe' }}">
+      <div class="meter-number">{{ result.risk_score|round(1) }}<small>%</small></div><div class="meter-caption">RISK ESTIMATE</div>
+      <div class="meter-track"><i style="width:{{ result.risk_score }}%"></i></div>
+      <span class="meter-range">0 <span>100</span></span>
+    </div>
+  </div>
+  <div class="report-facts">
+    <div><span>CLASSIFICATION</span><strong>{{ result.result }}</strong></div>
+    <div><span>RISK CATEGORY</span><strong>{{ result.risk_level }}</strong></div>
+    <div><span>MODEL PROBABILITY</span><strong>{% if result.probability is not none %}{{ (result.probability * 100)|round(1) }}%{% else %}Not available{% endif %}</strong></div>
+    <div><span>RULE INDICATORS</span><strong>{% if det %}{{ det.indicators|length }} detected{% else %}Not stored{% endif %}</strong></div>
+  </div>
+  <div class="submitted-address"><span>ANALYZED ADDRESS</span><code>{{ result.url }}</code></div>
+
+  {% if det %}
+  <div class="findings-grid">
+    <section class="finding-panel">
+      <div class="finding-heading"><span class="section-index">03A / RULE CHECKS</span><h3>Observed indicators</h3><p>Rule-based checks inspect visible parts of the URL. These indicators are explanatory and do not independently change the classifier score.</p></div>
+      {% if det.indicators %}
+        {% for i in det.indicators %}
+        <div class="indicator-row"><span class="severity {{ i.severity|lower }}">{{ i.severity }}</span><div><strong>{{ i.title }}</strong>{% if i.evidence %}<code>{{ i.evidence }}</code>{% endif %}</div></div>
+        {% endfor %}
+      {% else %}<div class="no-findings">No rule-based indicators were triggered for this URL.</div>{% endif %}
+    </section>
+    <section class="finding-panel pattern-panel">
+      <div class="finding-heading"><span class="section-index">03B / MODEL EXPLANATION</span><h3>Character patterns</h3><p>Patterns whose learned model weights contributed towards either class.</p></div>
+      <div class="pattern-group"><span class="pattern-label negative">TOWARDS PHISHING</span><div class="pattern-chips">{% for g in det.ngrams_phishing %}<span>{{ g.pattern }}</span>{% else %}<i>None identified</i>{% endfor %}</div></div>
+      <div class="pattern-group"><span class="pattern-label positive">TOWARDS LEGITIMATE</span><div class="pattern-chips">{{ '' }}{% for g in det.ngrams_legitimate %}<span>{{ g.pattern }}</span>{% else %}<i>None identified</i>{% endfor %}</div></div>
+    </section>
+  </div>
+  <div class="structure-block"><div class="finding-heading"><span class="section-index">04 / URL ANATOMY</span><h3>Structural observations</h3></div>
+    {% set s = det.structure %}
+    <div class="structure-grid">
+      <div><span>URL LENGTH</span><b>{{ s.url_length }}</b></div><div><span>HOST LENGTH</span><b>{{ s.hostname_length }}</b></div>
+      <div><span>SUB-DOMAINS</span><b>{{ s.number_of_subdomains }}</b></div><div><span>DIGITS / HYPHENS</span><b>{{ s.number_of_digits }} / {{ s.number_of_hyphens }}</b></div>
+      <div><span>HTTPS SCHEME</span><b>{{ 'Yes' if s.uses_https else 'No' }}</b></div>
+    </div>
+  </div>
+  {% else %}
+  <div class="system-message">This scan was recorded by an earlier version of PhishGuard, so its detailed breakdown was not stored.</div>
+  {% endif %}
+  <div class="report-disclaimer"><strong>How to interpret this report</strong><p>The risk score represents the classifier's estimated phishing probability. The verdict threshold is 50. The model can be wrong and evaluates URL text only — not page content, redirects or the live destination.</p></div>
+  <div class="report-actions"><a href="{{ url_for('scanner') }}" class="text-action">New inspection <b>↗</b></a><a href="{{ url_for('history') }}" class="text-action">Open scan archive <b>↗</b></a></div>
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/scanner.js') }}" defer></script>{% endblock %}
